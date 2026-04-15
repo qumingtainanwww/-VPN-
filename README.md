@@ -1,22 +1,38 @@
-# FreeNodes
+# 免费节点爬虫 - 使用说明
 
-v2ray、Clash免费节点爬虫，每日12点运行一次。
+## 功能简介
+一款免费 VPN代理节点爬取工具，支持从多个 GitHub 源获取节点，测试连接后导出可用节点。
 
-## 免责声明
+## 使用步骤
 
-订阅节点仅作学习交流使用，用于查找资料，学习知识，不做任何违法行为。
-所有资源均来自互联网，仅供大家交流学习使用，出现违法问题概不负责。
+## 文件位置
+- 程序：`运行爬虫程序`
+- 导出：`nodes` 文件夹
 
-## v2ray/clash 订阅列表:
+## 依赖
+- Python 3.x
+- requests
 
-| 爬虫目标 | 订阅链接 | [镜像加速订阅链接](https://gh-proxy.com/) | 更新日期 |
-| ---- | ---- | ---- | ---- |
-| [yudou66](https:/www.yudou789.top) | [nodes/yudou66.txt](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/yudou66.txt)<br>[nodes/yudou66.yaml](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/yudou66.yaml) | [nodes/yudou66.txt](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/yudou66.txt)<br>[nodes/yudou66.yaml](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/yudou66.yaml) | 2026-04-13 |
-| [blues](https://blues2022.blogspot.com) | [nodes/blues.txt](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/blues.txt)<br>[nodes/blues.yaml](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/blues.yaml) | [nodes/blues.txt](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/blues.txt)<br>[nodes/blues.yaml](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/blues.yaml) | 2026-02-03 |
-| [clashmeta](https://clash-meta.github.io) | [nodes/clashmeta.txt](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/clashmeta.txt)<br>[nodes/clashmeta.yaml](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/clashmeta.yaml) | [nodes/clashmeta.txt](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/clashmeta.txt)<br>[nodes/clashmeta.yaml](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/clashmeta.yaml) | 2025-10-13 |
-| [ndnode](https://www.naidounode.com) | [nodes/ndnode.txt](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/ndnode.txt)<br>[nodes/ndnode.yaml](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/ndnode.yaml) | [nodes/ndnode.txt](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/ndnode.txt)<br>[nodes/ndnode.yaml](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/ndnode.yaml) | 2026-04-14 |
-| [nodev2ray](https://nodev2ray.com) | [nodes/nodev2ray.txt](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/nodev2ray.txt)<br>[nodes/nodev2ray.yaml](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/nodev2ray.yaml) | [nodes/nodev2ray.txt](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/nodev2ray.txt)<br>[nodes/nodev2ray.yaml](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/nodev2ray.yaml) | 2026-04-13 |
-| [nodefree](https://nodefree.org) | [nodes/nodefree.txt](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/nodefree.txt)<br>[noddes/nodefree.yaml](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/nodefree.yaml) | [nodes/nodefree.txt](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/nodefree.txt)<br>[noddes/nodefree.yaml](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/nodefree.yaml) | 2026-04-12 |
-| [v2rayshare](https://v2rayshare.com) | [nodes/v2rayshare.txt](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/v2rayshare.txt)<br>[nodes/v2rayshare.yaml](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/v2rayshare.yaml) | [nodes/v2rayshare.txt](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/v2rayshare.txt)<br>[nodes/v2rayshare.yaml](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/v2rayshare.yaml) | 2026-04-13 |
-| [wenode](https://wenode.cc/clashmeta) | [nodes/wenode.txt](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/wenode.txt)<br>[nodes/wenode.yaml](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/wenode.yaml) | [nodes/wenode.txt](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/wenode.txt)<br>[nodes/wenode.yaml](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/wenode.yaml) | 2026-04-12 |
-| [simple](https://github.com/Barabama/FreeNodes) | [nodes/simple.txt](https://raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/simple.txt) | [nodes/simple.txt](https://gh-proxy.com/raw.githubusercontent.com/Barabama/FreeNodes/main/nodes/simple.txt) | |
+### 1. 爬取节点
+1. 选择并行线程数（50 100 150 200）
+2. 点击「开始爬取」按钮
+3. 等待爬取和测试完成
+
+### 2. 导出节点
+1. 选择要导出的国家（全部美国日本新加坡等）
+2. 点击「导出节点」按钮
+3. 导出格式：YAML（v2rayNG用）+ TXT（可直接复制）
+
+### 3. 分享给朋友
+- TXT 文件：直接复制内容，通过微信QQ发送
+- YAML 文件：发送文件到手机，用 v2rayNG 导入
+
+### 4. 其他功能
+- 「打开文件夹」：查看导出的文件
+- 「删除文件」：一键清理导出文件夹
+
+## 注意事项
+1. 免费节点有效期短，建议频繁更新
+2. 建议测试节点可用性直接用手机版的v2rayNG进行测试PC测试有bug我不会修
+3. 在PC测试显示 -1 是正常的（节点使用 Cloudflare CDN）主要是本作者实力有限不会修这个bug如果有哪位大佬知道可以跟我说我
+4. 节点需要在实际使用地点测试 IP纯净度和IP位置测试我推荐使用这个网站 httpsipdata.co
