@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+nodes/
+.DS_Store

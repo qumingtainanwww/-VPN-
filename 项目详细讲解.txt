@@ -1,0 +1,30 @@
+# 项目详细讲解
+
+## 一、概述
+免费VPN/代理节点爬取工具，从GitHub获取节点并测试连接。
+
+## 二、核心功能
+1. 多源爬取 - 8个GitHub数据源
+2. 并行测试 - TCP端口连通性测试
+3. 分类导出 - 按国家导出YAML/TXT格式
+4. GUI界面 - 深色主题
+
+## 三、工作流程
+启动 → 选择线程数 → 开始爬取 → 选择国家 → 导出节点 → 分享
+
+## 四、数据源
+FastNodes(US/All/VLESS/Trojan)、Epodonios、NiREvil、FreeNodes、CloudflareIP
+
+## 五、节点格式
+- VLESS: vless://uuid@ip:port?security=reality&sni=domain
+- Trojan: trojan://password@ip:port?sni=domain
+- SS: ss://base64(user:pass)@ip:port
+
+## 六、导出格式
+- TXT: 纯链接，可直接复制
+- YAML: Clash/v2rayNG格式，导入软件用
+
+## 七、注意事项
+1. 在中国测试显示-1是正常的（CDN节点）
+2. 免费节点有效期短，建议频繁更新
+3. 仅测TCP端口，不保证100%可用
