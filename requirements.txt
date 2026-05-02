@@ -1,0 +1,19 @@
+# requirements.txt
+
+# UI
+PyQt6
+
+# Network
+requests
+urllib3
+
+# Scraping
+scrapy
+selenium
+beautifulsoup4
+lxml
+
+# Utils
+fake_useragent
+aiohttp
+asyncio

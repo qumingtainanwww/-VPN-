@@ -1,0 +1,1116 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NodeCollector</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Outfit', sans-serif; color: #fff; min-height: 100vh; overflow-x: hidden; }
+        /* 流畅排版：字体大小随视口平滑缩放 */
+        html { font-size: clamp(14px, 2.5vw, 16px); }
+        body { font-size: clamp(14px, 2.5vw, 16px); line-height: 1.6; }
+
+        /* 改善焦点可见性（无障碍） */
+        :focus-visible {
+            outline: 2px solid #89b4fa;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+        /* 选中文本颜色 */
+        ::selection {
+            background: rgba(137, 180, 250, 0.3);
+            color: #fff;
+        }
+        /* iOS 弹性滚动优化 */
+        body {
+            -webkit-overflow-scrolling: touch;
+            -webkit-text-size-adjust: 100%;
+        }
+        /* 优化表单元素在移动端的默认样式 */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* 防止长按选中文本（移动端优化） */
+        .btn-card, .panel {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        .container {
+            height: 100%;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at bottom, #321b35 0%, #090a0f 100%);
+            position: relative;
+        }
+
+        .stars {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 4s ease-in-out infinite;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        .wrapper {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 300;
+            letter-spacing: 8px;
+            margin: 20px 0;
+            background: linear-gradient(90deg, #fff, #89b4fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: box-shadow 0.3s;
+        }
+
+        .panel-glow {
+            box-shadow: 0 0 25px rgba(137, 180, 250, 0.3);
+        }
+
+        .panel-title { font-size: 14px; color: #89b4fa; margin-bottom: 10px; }
+        .btn-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        
+        .btn-card {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            background: rgba(255,255,255,0.1);
+            color: #ccc;
+        }
+        
+        .btn-card.selected {
+            color: #1e1e2e;
+            background: #89b4fa;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #89b4fa, #74c7ec);
+            color: #1e1e2e;
+            font-weight: 700;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #9bc4fa, #84d7fc);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .controls { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+        .control { display: flex; align-items: center; gap: 8px; }
+        .control label { font-size: 13px; color: #aaa; }
+
+        /* ===== 响应式布局开始 ===== */
+        /* 平板端优化 (768px-1024px) */
+        @media (max-width: 1024px) {
+            .wrapper { max-width: 100%; padding: 15px; }
+            .package, .package-right {
+                position: relative !important;
+                left: auto !important;
+                right: auto !important;
+                top: auto !important;
+                transform: none !important;
+                width: 100%;
+                max-width: 300px;
+                margin: 0 auto 15px;
+            }
+            .package2 { padding: 8px 12px 25px 12px; }
+            h1 { font-size: 28px; letter-spacing: 5px; }
+            .btn-card { padding: 10px 14px; font-size: 12px; min-height: 36px; }
+            .stats { gap: 20px; padding: 15px; }
+            .stat-value { font-size: 22px; }
+        }
+
+        /* 移动端优化 (767px以下) */
+        @media (max-width: 767px) {
+            .container { padding: 0; }
+            .wrapper {
+                max-width: 100%;
+                padding: 10px;
+                margin: 0;
+            }
+            h1 {
+                font-size: 22px;
+                letter-spacing: 3px;
+                margin: 15px 0;
+            }
+            /* 卡片堆叠 */
+            .package, .package-right {
+                position: relative !important;
+                left: auto !important;
+                right: auto !important;
+                top: auto !important;
+                transform: none !important;
+                width: 100%;
+                max-width: 100%;
+                margin: 0 0 12px 0;
+                border-radius: 12px;
+            }
+            .package2 {
+                padding: 8px 10px 20px 10px;
+                border-radius: 8px;
+            }
+            .avatar {
+                width: 60px;
+                height: 60px;
+            }
+            .author-name { font-size: 15px; }
+            .bilibili, .link-line { font-size: 12px; }
+            
+            /* Panel 移动端优化 */
+            .panel {
+                padding: 12px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+            }
+            .panel-title { font-size: 12px; margin-bottom: 8px; }
+            
+            /* 按钮网格移动端 */
+            .btn-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 6px;
+            }
+            .btn-card {
+                padding: 10px 8px;
+                font-size: 11px;
+                min-height: 44px; /* 触摸友好 */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 6px;
+            }
+            
+            /* 控制区域移动端 */
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            .control {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .control label {
+                font-size: 12px;
+                font-weight: 600;
+            }
+            input[type="number"] {
+                width: 100%;
+                padding: 10px;
+                font-size: 14px;
+                border-radius: 8px;
+            }
+            
+            /* 统计区域移动端 */
+            .stats {
+                flex-direction: row;
+                gap: 10px;
+                padding: 12px;
+                border-radius: 12px;
+            }
+            .stat { flex: 1; }
+            .stat-value { font-size: 20px; }
+            .stat-label { font-size: 11px; }
+            
+            /* 日志区域移动端 */
+            .log-box {
+                height: 150px;
+                padding: 10px;
+                font-size: 12px;
+                border-radius: 12px;
+            }
+            
+            /* 操作按钮移动端 */
+            .actions {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .actions .btn-card {
+                flex: 1 1 calc(50% - 4px);
+                min-height: 44px;
+                font-size: 12px;
+            }
+        }
+
+        /* 小屏手机 (480px以下) - 企业级优化 */
+        @media (max-width: 480px) {
+            .wrapper { padding: 8px; }
+            h1 {
+                font-size: 18px;
+                letter-spacing: 2px;
+                margin: 12px 0;
+                line-height: 1.3;
+            }
+            /* 8px基础间距系统 */
+            .panel {
+                padding: 10px;
+                margin-bottom: 8px;
+                border-radius: 6px;
+            }
+            .panel-title {
+                font-size: 11px;
+                margin-bottom: 6px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            /* 按钮网格：2列，优化间距 */
+            .btn-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+            }
+            .btn-card {
+                padding: 10px 6px;
+                font-size: 11px;
+                min-height: 44px;
+                border-radius: 4px;
+                font-weight: 500;
+                line-height: 1.2;
+                transition: all 0.2s ease;
+            }
+            .btn-card:active {
+                transform: scale(0.98);
+                background: rgba(137, 180, 250, 0.3);
+            }
+            .btn-primary {
+                padding: 12px 16px;
+                font-size: 13px;
+                min-height: 48px;
+                border-radius: 6px;
+                letter-spacing: 0.3px;
+            }
+            .package {
+                border-radius: 10px;
+                margin-bottom: 8px;
+            }
+            .package2 {
+                padding: 6px 8px 12px 8px;
+                border-radius: 6px;
+            }
+            .disclaimer-title {
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
+            .disclaimer-text {
+                font-size: 11px;
+                line-height: 1.4;
+                margin-bottom: 4px;
+            }
+            /* 控制区域优化 */
+            .controls {
+                gap: 8px;
+            }
+            .control {
+                gap: 4px;
+            }
+            .control label {
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: #89b4fa;
+            }
+            input[type="number"] {
+                width: 100%;
+                padding: 10px;
+                font-size: 14px;
+                border-radius: 6px;
+                min-height: 44px;
+            }
+            /* 统计区域优化 */
+            .stats {
+                gap: 8px;
+                padding: 10px;
+                border-radius: 8px;
+            }
+            .stat { flex: 1; }
+            .stat-value {
+                font-size: 18px;
+                font-weight: 700;
+                line-height: 1.2;
+            }
+            .stat-label {
+                font-size: 10px;
+                margin-top: 2px;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+            }
+            /* 日志区域优化 */
+            .log-box {
+                height: 120px;
+                padding: 8px;
+                font-size: 11px;
+                border-radius: 8px;
+                line-height: 1.4;
+            }
+            .log-line {
+                margin: 1px 0;
+                gap: 4px;
+            }
+            .log-icon {
+                width: 12px;
+                font-size: 10px;
+            }
+            /* 操作按钮优化 */
+            .actions {
+                gap: 6px;
+                margin-top: 12px;
+            }
+            .actions .btn-card {
+                flex: 1 1 100%;
+                min-height: 48px;
+                font-size: 12px;
+                border-radius: 6px;
+                font-weight: 600;
+            }
+            /* 超小屏幕 (320px) 微调 */
+            @media (max-width: 360px) {
+                h1 { font-size: 16px; letter-spacing: 1px; }
+                .btn-grid { grid-template-columns: 1fr; }
+                .btn-card { padding: 12px 8px; font-size: 12px; }
+                .stat-value { font-size: 16px; }
+                .package2 { padding: 4px 6px 10px 6px; }
+                .avatar { width: 50px; height: 50px; }
+                .author-name { font-size: 14px; }
+                .bilibili, .link-line { font-size: 11px; }
+            }
+        }
+
+        /* 大屏桌面优化 (1440px以上) */
+        @media (min-width: 1440px) {
+            .wrapper { max-width: 1200px; }
+            .package, .package-right { width: 260px; }
+            .package2 { padding: 10px 20px 40px 20px; }
+            h1 { font-size: 42px; }
+        }
+
+        /* 触摸设备优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .btn-card {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            .panel:hover { box-shadow: none; }
+            .panel:active { box-shadow: 0 0 25px rgba(137, 180, 250, 0.3); }
+            .package:hover { box-shadow: none; }
+            .package:active { box-shadow: 0px 0px 30px 1px rgba(204, 0, 255, 0.3); }
+        }
+
+        /* 暗色模式已默认支持（当前即为暗色主题） */
+        /* 横屏模式优化 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .wrapper { padding: 10px; }
+            h1 { font-size: 20px; margin: 10px 0; }
+            .panel { padding: 10px; margin-bottom: 8px; }
+            .log-box { height: 120px; }
+        }
+        /* ===== 响应式布局结束 ===== */
+
+        /* 主布局：桌面端三栏，移动端单栏 */
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+                align-items: center;
+                padding: 15px;
+                gap: 15px;
+            }
+        }
+        @media (max-width: 767px) {
+            .main-layout {
+                padding: 10px;
+                gap: 12px;
+            }
+        }
+        input[type="number"] {
+            width: 70px;
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.4);
+            color: #a6e3a1;
+            font-size: 15px;
+            text-align: center;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.3);
+        }
+        .stat { text-align: center; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #89b4fa; }
+        .stat-label { font-size: 12px; color: #888; margin-top: 4px; }
+        .log-box {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font: 13px Consolas, monospace;
+            line-height: 1.6;
+        }
+        .log-progress {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .log-progress-bar {
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 6px 0;
+        }
+        .log-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #89b4fa, #a6e3a1);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        .log-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #888;
+        }
+        .log-stats span { color: #89b4fa; }
+        .log-line { display: flex; align-items: center; gap: 8px; margin: 2px 0; }
+        .log-icon { width: 14px; text-align: center; }
+        .log-info { color: #89b4fa; }
+        .log-success { color: #a6e3a1; }
+        .log-error { color: #f38ba8; }
+        .actions { display: flex; justify-content: center; gap: 12px; margin-top: 16px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 卡片基础样式（所有设备共享） */
+        .package {
+            width: 240px;
+            height: 305px;
+            background-image: linear-gradient(163deg, #ff00ff 0%, #3700ff 100%);
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.25s cubic-bezier(0,0,0,1);
+        }
+        .package-right {
+            /* 桌面端绝对定位在媒体查询中定义 */
+        }
+        
+        /* 桌面端（>1024px）：两侧绝对定位 + wrapper留白 */
+        @media (min-width: 1025px) {
+            .package {
+                position: absolute !important;
+                left: 75px !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                z-index: 20 !important;
+            }
+            .package-right {
+                position: absolute !important;
+                left: auto !important;
+                right: 75px !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                z-index: 20 !important;
+            }
+            /* wrapper留出两侧空间，避免被卡片遮挡 */
+            .wrapper {
+                margin-left: 300px;
+                margin-right: 300px;
+                max-width: 800px;
+            }
+            .main-layout {
+                position: relative;
+            }
+        }
+        .package:hover {
+            box-shadow: 0px 0px 30px 1px rgba(204, 0, 255, 0.3);
+        }
+
+        .package2 {
+            width: 240px;
+            height: 305px;
+            background-color: #1d1724;
+            border-radius: 10px;
+            transition: all 0.25s cubic-bezier(0,0,0,1);
+            padding: 5px 15px 35px 15px;
+            cursor: pointer;
+        }
+
+        .package2:hover {
+            transform: scale(0.98);
+            border-radius: 18px;
+        }
+        .disclaimer-title {
+            color: #89b4fa;
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .disclaimer-text {
+            color: #ffd93d;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin: 0 0 6px 0;
+            text-shadow: 0 0 8px rgba(255, 217, 61, 0.4);
+        }
+        .disclaimer-text:last-child {
+            margin-bottom: 0;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+            overflow: hidden;
+            margin: 0 auto 10px;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .author-name {
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+
+        .bilibili {
+            color: #aaa;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+        }
+
+        .link-line {
+            color: #888;
+            font-size: 13px;
+            width: 100%;
+            text-align: center;
+            word-break: break-all;
+            line-height: 1.4;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin: 0 0 8px 0;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="stars" id="stars"></div>
+        
+        <!-- 响应式主布局：桌面端三栏，移动端单栏 -->
+        <div class="main-layout">
+            <!-- 左侧作者卡片 -->
+            <div class="package" id="authorCard">
+                <div class="package2">
+                    <div class="avatar">
+                        <img src="/static/avatar.png" alt="avatar">
+                    </div>
+                     <p class="author-name" style="margin-top:12px;">作者：鲨鲨</p>
+                    <p class="bilibili">B站：鲨鲨做点项目</p>
+                     <p class="bilibili" style="margin-top:8px;">QQ交流群：1094189671</p>
+                     <div class="link-line">GitHub：https://github.com/qumingtainanwww/NodeCollector</div>
+                     <div class="link-line" style="margin-top:8px;">爱发电：https://ifdian.net/a/shasha-vault</div>
+                 </div>
+             </div>
+             
+             <!-- 中间主内容区 -->
+             <div class="wrapper">
+                 <h1>NodeCollector</h1>
+            
+            <div class="panel" id="panel1">
+                <div class="panel-title">协议筛选</div>
+                <div class="btn-grid" id="protocols">
+                    <button class="btn-card" onclick="toggleProto(this)">VMess</button>
+                    <button class="btn-card" onclick="toggleProto(this)">VLESS</button>
+                    <button class="btn-card" onclick="toggleProto(this)">Shadowsocks</button>
+                    <button class="btn-card" onclick="toggleProto(this)">Trojan</button>
+                    <button class="btn-card" onclick="toggleProto(this)">Hysteria2</button>
+                </div>
+                <div class="actions" style="margin-top:10px">
+                    <button class="btn-card" onclick="document.querySelectorAll('#protocols .btn-card').forEach(b=>{b.classList.add('selected');b.dataset.p=b.textContent});selProtocols=['VMess','VLESS','Shadowsocks','Trojan','Hysteria2']">全选</button>
+                    <button class="btn-card" onclick="document.querySelectorAll('#protocols .btn-card').forEach(b=>b.classList.remove('selected'));selProtocols=[]">清除</button>
+                </div>
+            </div>
+            
+            <div class="panel" id="panel2">
+                <div class="controls">
+                    <div class="control">
+                        <label>并发</label>
+                        <div class="btn-grid" id="threads">
+                            <button class="btn-card selected" onclick="s(this,'threads')">50</button>
+                            <button class="btn-card" onclick="s(this,'threads')">100</button>
+                            <button class="btn-card" onclick="s(this,'threads')">150</button>
+                            <button class="btn-card" onclick="s(this,'threads')">200</button>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label>源</label>
+                        <div class="btn-grid" style="margin-bottom:5px" id="sources">
+                            <button class="btn-card selected" onclick="s(this,'sources')">全</button>
+                            <button class="btn-card" onclick="s(this,'sources')">5</button>
+                            <button class="btn-card" onclick="s(this,'sources')">10</button>
+                            <button class="btn-card" onclick="s(this,'sources')">15</button>
+                            <button class="btn-card" onclick="s(this,'sources')">20</button>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label>节点上限</label>
+                        <input type="number" id="maxNodes" value="30" min="10">
+                    </div>
+                    <button class="btn-card btn-primary" id="importBtn" onclick="importLocal()">导入本地库</button>
+                    <button class="btn-card btn-primary" id="libraryBtn" onclick="loadLibrary()">本地获取</button>
+                    <button class="btn-card btn-primary" id="scrapeBtn" onclick="startScrape()">网络获取</button>
+                    <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="handleFileSelect(event)">
+                </div>
+            </div>
+            
+            <div class="panel" id="panel2b">
+                <div class="controls">
+                    <div class="control">
+                        <label>国家</label>
+                        <div class="btn-grid" id="countries">
+                            <button class="btn-card selected" onclick="s(this,'countries')">全部</button>
+                            <button class="btn-card" onclick="s(this,'countries')">美国</button>
+                            <button class="btn-card" onclick="s(this,'countries')">加拿大</button>
+                            <button class="btn-card" onclick="s(this,'countries')">英国</button>
+                            <button class="btn-card" onclick="s(this,'countries')">德国</button>
+                            <button class="btn-card" onclick="s(this,'countries')">荷兰</button>
+                            <button class="btn-card" onclick="s(this,'countries')">日本</button>
+                            <button class="btn-card" onclick="s(this,'countries')">新加坡</button>
+                            <button class="btn-card" onclick="s(this,'countries')">香港</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel" id="panel3">
+                <div class="controls">
+                    <div class="control">
+                        <label>格式</label>
+                        <div class="btn-grid">
+                            <button class="btn-card selected" onclick="selFormat=this.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.classList.remove('selected'));this.classList.add('selected')" data-f="geekez">GeekEZ</button>
+                            <button class="btn-card" onclick="selFormat=this.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.classList.remove('selected'));this.classList.add('selected')" data-f="v2rayn">v2rayN</button>
+                            <button class="btn-card" onclick="selFormat=this.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.classList.remove('selected'));this.classList.add('selected')" data-f="txt">TXT</button>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label>来源</label>
+                        <div class="btn-grid" id="exportSource">
+                            <button class="btn-card selected" onclick="exportSource='current';sel(this)">当前</button>
+                            <button class="btn-card" onclick="exportSource='local';sel(this)">本地</button>
+                            <button class="btn-card" onclick="exportSource='scraped';sel(this)">网络</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel" id="panel4">
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="nodeCount">{{ node_count }}</div>
+                        <div class="stat-label">可用节点</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="ipCount">{{ ip_count }}</div>
+                        <div class="stat-label">历史IP</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel" id="panel5">
+                <div class="log-box" id="log"></div>
+            </div>
+            
+              <div class="actions">
+                  <button class="btn-card" onclick="exportNodes()">导出</button>
+                  <button class="btn-card" onclick="copyNodes()">复制</button>
+                  <button class="btn-card" onclick="clearHistory()">清除历史</button>
+                  <button class="btn-card" onclick="clearFolder()">清空文件夹</button>
+                  <button class="btn-card" onclick="openFolder()">打开文件夹</button>
+                  <button class="btn-card" style="background:rgba(255,107,107,0.3);border-color:#ff6b6b;color:#ff6b6b" onclick="shutdownServer()">关闭服务</button>
+              </div>
+        </div>
+
+        <!-- 右侧免责声明卡片 -->
+        <div class="package package-right" id="disclaimerCard">
+            <div class="package2">
+                <div class="disclaimer-title">免责声明</div>
+                <div class="disclaimer-text">1. 本项目代码以开源技术交流形式公开，严格遵守中国法律法规，明确声明：不鼓励、不引导、不协助任何未经批准的跨境网络连接行为。</div>
+                <div class="disclaimer-text">2. 项目不包含任何自有服务器或节点资源，仅作本地数据采集技术的代码演示；我们不保证任何节点的可用性、安全性或合规性。</div>
+                <div class="disclaimer-text">3. 用户须承诺：不得将本项目用于任何违反中国法律法规的场景，否则由此产生的一切纠纷、处罚、损失均由用户独立承担，项目方保留追究恶意使用法律责任的权利。</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        let selProtocols = [], selThreads = '50', selFormat = 'geekez', selSource = '全', selCountry = '全部';
+
+        (function(){
+            const s = document.getElementById('stars');
+            for(let i=0;i<30;i++){
+                const d = document.createElement('div');
+                d.className = 'star';
+                d.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${Math.random()*2+2}px;height:${Math.random()*2+2}px;animation-delay:${Math.random()*4}s`;
+                s.appendChild(d);
+            }
+        })();
+
+        document.querySelectorAll('.panel').forEach(p => {
+            p.addEventListener('mouseenter', () => p.classList.add('panel-glow'));
+            p.addEventListener('mouseleave', () => p.classList.remove('panel-glow'));
+        });
+
+        function toggleProto(btn) {
+            btn.classList.toggle('selected');
+            selProtocols = Array.from(document.querySelectorAll('#protocols .btn-card.selected')).map(b => b.textContent);
+        }
+        function s(btn, gid) {
+            var list = document.querySelectorAll('#' + gid + ' .btn-card');
+            for(var i = 0; i < list.length; i++) {
+                list[i].classList.remove('selected');
+            }
+            btn.classList.add('selected');
+            if(gid === 'sources') { selSource = btn.textContent === '全' ? 'all' : btn.textContent; }
+            if(gid === 'threads') selThreads = btn.textContent;
+            if(gid === 'countries') {
+                const map = {'全部':'all','美国':'US','加拿大':'CA','英国':'GB','德国':'DE','荷兰':'NL','日本':'JP','新加坡':'SG','香港':'HK','俄罗斯':'RU'};
+                selCountry = map[btn.textContent] || btn.textContent;
+            }
+        }
+
+        let logChecked = 0, logValid = 0, logTotal = 0, logStartTime = 0;
+
+        async function importLocal() {
+            document.getElementById('fileInput').click();
+        }
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!file.name.endsWith('.txt')) {
+                log('请选择.txt文件', 'error');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', file);
+            // 发送前端选定的协议和节点上限
+            formData.append('protocols', selProtocols.join(','));
+            formData.append('max_nodes', document.getElementById('maxNodes').value);
+            try {
+                const d = await fetch('/api/import_local', { method: 'POST', body: formData });
+                const r = await d.json();
+                if (r.error) log(r.error, 'error');
+                else {
+                    // 显示详细信息：文件名 + 各协议数量
+                    let detail = `导入 ${r.filename}: ${r.count} 个节点`;
+                    if (r.protocols) {
+                        const protoStr = Object.entries(r.protocols).map(([k,v]) => `${k}:${v}`).join(', ');
+                        detail += ` (${protoStr})`;
+                    }
+                    log(detail, 'success');
+                }
+            } catch(e) { log(e.message, 'error'); }
+        }
+
+        let libraryTimer;
+        async function loadLibrary() {
+            if(!selProtocols.length) return alert('请选协议!');
+            const btn = document.getElementById('libraryBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class=spinner> 读取中';
+            document.getElementById('log').innerHTML = '⏳ 正在读取本地库，请稍候...';
+            try {
+                const d = await fetch('/api/load_library', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        protocols: selProtocols.join(','),
+                        max_nodes: document.getElementById('maxNodes').value
+                    })
+                });
+                const initR = await d.json();
+                if(initR.error){
+                    document.getElementById('log').innerHTML = '❌ ' + initR.error;
+                    btn.disabled = false;
+                    btn.innerHTML = '本地获取';
+                    return;
+                }
+                // 轮询日志（完整渲染最近50条）
+                libraryTimer = setInterval(async () => {
+                    try {
+                        const r = await fetch('/api/logs').then(x => x.json());
+                        const l = document.getElementById('log');
+                        // 渲染最近50条日志
+                        const recentLogs = r.logs.slice(-50);
+                        let html = '';
+                        for(let lg of recentLogs) {
+                            const icon = lg.level==='success'?'✅':lg.level==='error'?'❌':lg.level==='warning'?'⏳':'ℹ️';
+                            html += `<div class="log-line"><span class="log-icon">${icon}</span><span class="log-${lg.level}">[${lg.time}] ${lg.msg}</span></div>`;
+                        }
+                        l.innerHTML = html;
+                        l.scrollTop = l.scrollHeight;
+                        // 检查完成（查找"本地获取完成"日志）
+                        const finalLog = r.logs.find(lg => lg.msg.includes('本地获取完成'));
+                        if(finalLog) {
+                            clearInterval(libraryTimer);
+                            btn.disabled = false;
+                            btn.innerHTML = '本地获取';
+                            // 显示最终结果
+                            let detail = `本地获取完成: ${initR.count} 个节点`;
+                            if(initR.protocols) {
+                                const protoStr = Object.entries(initR.protocols).map(([k,v]) => `${k}:${v}`).join(', ');
+                                detail += ` (${protoStr})`;
+                            }
+                            log(detail, 'success');
+                        }
+                    } catch(e) { }
+                }, 300);
+            } catch(e) {
+                log(e.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '本地获取';
+            }
+        }
+        function setProgress(checked, valid, total){
+            logChecked = checked; logValid = valid; logTotal = total;
+            logStartTime = logStartTime || Date.now();
+            const pct = total > 0 ? Math.round(checked/total*100) : 0;
+            const elapsed = ((Date.now()-logStartTime)/1000).toFixed(1);
+            const speed = checked/elapsed.toFixed(1);
+            const l = document.getElementById('log');
+            l.innerHTML = `
+                <div class="log-progress">
+                    <div class="log-stats">
+                        <span>进度 ${checked}/${total}</span>
+                        <span>${pct}%</span>
+                    </div>
+                    <div class="log-progress-bar">
+                        <div class="log-progress-fill" style="width:${pct}%"></div>
+                    </div>
+                    <div class="log-stats">
+                        <span>有效: <b style="color:#a6e3a1">${valid}</b></span>
+                        <span>${elapsed}秒 / ${speed}/秒</span>
+                    </div>
+                </div>
+                ${l.innerHTML.split('</div>')[1] || ''}
+            `;
+        }
+        function log(m,t='info'){
+            const icon = t==='success'?'✅':t==='error'?'❌':t==='warning'?'⏳':'ℹ️';
+            const l=document.getElementById('log');
+            const existing = l.querySelector('.log-progress');
+            if(existing){
+                // 有进度条时，在进度条后追加
+                existing.insertAdjacentHTML('afterend', `<div class="log-line"><span class="log-icon">${icon}</span><span class="log-${t}">${m}</span></div>`);
+            } else {
+                // 无进度条时，直接追加
+                l.innerHTML += `<div class="log-line"><span class="log-icon">${icon}</span><span class="log-${t}">${m}</span></div>`;
+            }
+            l.scrollTop=l.scrollHeight;
+        }
+
+        async function fetchLogs(){
+            try{
+                const r=await fetch('/api/logs').then(x=>x.json());
+                const l=document.getElementById('log');
+                let html='', prog='';
+                for(let i=Math.max(0,r.logs.length-20);i<r.logs.length;i++){
+                    const lg=r.logs[i];
+                    const icon=lg.level==='success'?'✅':lg.level==='error'?'❌':lg.level==='warning'?'⏳':'ℹ️';
+                    if(lg.msg.includes('进度')||lg.msg.includes('并发')||lg.msg.includes('检测')){
+                        prog=`<div class="log-progress"><div class="log-stats"><span>${lg.msg}</span><span>${lg.time}</span></div></div>`;
+                    }else{
+                        html+=`<div class="log-line"><span class="log-icon">${icon}</span><span class="log-${lg.level}">[${lg.time}] ${lg.msg}</span></div>`;
+                    }
+                }
+                l.innerHTML=prog+html;
+                l.scrollTop=l.scrollHeight;
+            }catch(e){}
+        }
+        
+        let scrapeTimer;
+        async function startScrape(){
+            if(!selProtocols.length)return alert('请选协议!');
+            const btn=document.getElementById('scrapeBtn');
+            btn.disabled=true;
+            btn.innerHTML='<span class=spinner> 检测中';
+            log('⏳ 正在获取节点，请稍候...', 'info');
+            try{
+                const d=await fetch('/api/scrape',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+                    protocols:selProtocols,
+                    threads:selThreads,
+                    max_nodes:document.getElementById('maxNodes').value,
+                    source_count:selSource,
+                    country:selCountry
+                })});
+                const initR=await d.json();
+                if(initR.error){
+                    log(initR.error, 'error');
+                    btn.disabled=false;
+                    btn.innerHTML='开始爬取';
+                    return;
+                }
+                // 轮询日志（完整渲染最近50条）
+                scrapeTimer = setInterval(async ()=>{
+                    try{
+                        const r=await fetch('/api/logs').then(x=>x.json());
+                        const l=document.getElementById('log');
+                        // 渲染最近50条日志（避免DOM过大）
+                        const recentLogs = r.logs.slice(-50);
+                        let html = '';
+                        for(let lg of recentLogs){
+                            const icon = lg.level==='success'?'✅':lg.level==='error'?'❌':lg.level==='warning'?'⏳':'ℹ️';
+                            html += `<div class="log-line"><span class="log-icon">${icon}</span><span class="log-${lg.level}">[${lg.time}] ${lg.msg}</span></div>`;
+                        }
+                        l.innerHTML = html;
+                        l.scrollTop = l.scrollHeight;
+                        // 检查完成
+                        if(r.status && !r.status.running){
+                            clearInterval(scrapeTimer);
+                            const rate = r.status.total>0 ? Math.round(r.status.valid/r.status.total*100) : 0;
+                            document.getElementById('nodeCount').textContent=r.status.valid;
+                            document.getElementById('ipCount').textContent=r.status.ip_count || 0;
+                        }
+                    }catch(e){}
+                }, 200);
+            }catch(e){document.getElementById('log').innerHTML='❌ '+e.message}
+            btn.disabled=false;
+            btn.innerHTML='开始爬取';
+        }
+        let exportSource = 'current'; // 'current' | 'local' | 'scraped'
+        function sel(btn){
+            document.querySelectorAll('#exportSource .btn-card').forEach(x=>x.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+        async function exportNodes(){
+            log('导出中...');
+            try{
+                const d=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({country:selCountry,format:selFormat,protocols:selProtocols,source:exportSource})}).then(r=>r.json());
+                if(d.error)log(d.error,'error');else{log(`导出: ${d.count} 节点到 ${d.filename} (${selFormat})`,'success')}
+            }catch(e){log(e,'error')}
+        }
+        async function copyNodes(){
+            try{
+                const d=await fetch('/api/copy',{method:'POST'}).then(r=>r.json());
+                if(d.success){log(`已复制 ${d.count} 个节点到剪贴板`,'success')}else{log(d.error,'error')}
+            }catch(e){log(e,'error')}
+        }
+        async function clearHistory(){
+            if(confirm('清除历史IP记录?')){
+                await fetch('/api/clear_history',{method:'POST'});
+                document.getElementById('ipCount').textContent='0';
+                log('IP历史已清空','success')
+            }
+        }
+        async function clearFolder(){
+            if(confirm('清空 nodes 文件夹?')){
+                await fetch('/api/clear_folder',{method:'POST'});
+                log('文件夹已清空','success')
+            }
+        }
+        async function openFolder(){
+            await fetch('/api/open_folder',{method:'POST'});
+            log('已打开文件夹','success')
+        }
+        async function shutdownServer(){
+            if(!confirm('确定要关闭服务吗？\n关闭后需要重新启动 NodeCollector.exe')){
+                return;
+            }
+            try{
+                const d = await fetch('/api/shutdown',{method:'POST'}).then(r=>r.json());
+                if(d.success){
+                    log('服务正在关闭...', 'warning');
+                    setTimeout(() => {
+                        document.body.innerHTML = '<div style="text-align:center;padding:50px;color:#fff"><h2>服务已关闭</h2><p>请关闭此窗口，并手动关闭 NodeCollector.exe 进程</p></div>';
+                    }, 1000);
+                }else{
+                    log('关闭失败: ' + (d.error || '未知错误'), 'error');
+                }
+            }catch(e){
+                log('关闭请求失败: ' + e.message, 'error');
+            }
+        }
+        log('就绪');
+    </script>
+</body>
+</html>

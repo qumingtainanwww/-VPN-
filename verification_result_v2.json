@@ -1,0 +1,96 @@
+{
+  "status": "completed",
+  "checks": [
+    {
+      "check": "_RE_URI_HASH 预编译",
+      "status": "PASS"
+    },
+    {
+      "check": "_RE_AT_IP_PORT 预编译",
+      "status": "PASS"
+    },
+    {
+      "check": "_RE_PROTOCOL_START 预编译",
+      "status": "PASS"
+    },
+    {
+      "check": "_RE_PORT_IN_LINE 预编译",
+      "status": "PASS"
+    },
+    {
+      "check": "_RE_IP_PORT_END 预编译",
+      "status": "PASS"
+    },
+    {
+      "check": "_RE_IP_DOT_DECIMAL 预编译",
+      "status": "PASS"
+    },
+    {
+      "check": "_RE_URL_PROTOCOL 预编译",
+      "status": "PASS"
+    },
+    {
+      "check": "_data_lock 线程锁",
+      "status": "PASS"
+    },
+    {
+      "check": "_decode_vmess 函数提取",
+      "status": "PASS"
+    },
+    {
+      "check": "_get_ip_hash 函数提取",
+      "status": "PASS"
+    },
+    {
+      "check": "working_nodes 全局变量",
+      "status": "PASS"
+    },
+    {
+      "check": "local_nodes 全局变量",
+      "status": "PASS"
+    },
+    {
+      "check": "scraped_nodes 全局变量",
+      "status": "PASS"
+    },
+    {
+      "check": "ip_history 全局变量",
+      "status": "PASS"
+    },
+    {
+      "check": "protocol_nodes 全局变量",
+      "status": "PASS"
+    },
+    {
+      "check": "country_nodes 全局变量",
+      "status": "PASS"
+    },
+    {
+      "check": "logs 全局变量",
+      "status": "PASS"
+    },
+    {
+      "check": "路由注册",
+      "status": "PASS",
+      "count": 13
+    },
+    {
+      "check": "GET /",
+      "status": "PASS",
+      "code": 200
+    },
+    {
+      "check": "GET /api/logs",
+      "status": "PASS",
+      "code": 200
+    }
+  ],
+  "summary": {
+    "regex": "7/7 passed",
+    "thread_lock": "PASS",
+    "functions": "2/2 passed",
+    "globals": "7/7 passed",
+    "routes": "13 routes registered",
+    "overall": "ALL CHECKS PASSED"
+  }
+}

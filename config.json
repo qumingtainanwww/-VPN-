@@ -1,0 +1,41 @@
+{
+  "yudou66": {
+    "start_url": "https://www.yudou789.top/",
+    "up_date": "2026-04-18",
+    "selector": "div.item-thumbnail > a[target='_blank']",
+    "pattern": "https?://hh.yudou226.top/[^<>\\r\\n]+",
+    "password": "1122",
+    "yt_idx": 0,
+    "script": "var pwd = arguments[0]; var box = null; var attempts = 0; while (!box && attempts < 10) { box = document.querySelector('.cl-noindent-wrapper'); if (!box) { setTimeout(() => {}, 500); attempts++; } } if (box) { var input = box.querySelector('.cl-input'); var btn = box.querySelector('.cl-btn'); if (input && btn) { input.value = pwd; btn.click(); } }"
+  },
+  "clashmeta": {
+    "start_url": "https://freev2rayclash.github.io/",
+    "up_date": "2026-04-18",
+    "selector": "a[class='xcblog-blog-url']",
+    "pattern": "https?://freev2rayclash\\.github\\.io/uploads/[^<>\\r\\n]+"
+  },
+  "ndnode": {
+    "start_url": "https://www.naidounode.com/",
+    "up_date": "2026-04-18",
+    "selector": "a[class='text-reset']",
+    "pattern": "https?://naidounode.cczzuu.top/node/[^<>\\r\\n]+"
+  },
+  "freev2ray": {
+    "start_url": "https://freev2rayclash.github.io/",
+    "up_date": "2026-04-18",
+    "selector": "a[href*='uploads']",
+    "pattern": "https?://freev2rayclash\\.github\\.io/uploads/[^<>\\r\\n]+"
+  },
+  "nodesfree": {
+    "start_url": "https://nodesfree.github.io/v2raynode/",
+    "up_date": "2026-04-18",
+    "selector": "a[class='text-reset']",
+    "pattern": "https?://nodesfree\\.github\\.io/v2raynode/[^<>\\r\\n]+"
+  },
+  "free-nodes": {
+    "start_url": "https://v2raygithub.com/free-node/",
+    "up_date": "2026-04-18",
+    "selector": "a[class='text-reset']",
+    "pattern": "https?://raw.githubusercontent.com/free-nodes/[^<>\\r\\n]+"
+  }
+}
