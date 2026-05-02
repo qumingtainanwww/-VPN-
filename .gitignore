@@ -21,7 +21,7 @@ package-lock.json
 Thumbs.db
 
 # 数据和敏感信息
-nodes/
+# nodes/ 已取消排除，允许上传节点数据
 *.exe
 *.spec
 dist_exe/
